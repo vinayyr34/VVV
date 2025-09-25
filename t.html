@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Merge Sort Advanced Simulation</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+
+    .tree {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .array-box {
+      display: flex;
+      background-color: #e1f5fe;
+      border: 2px solid #0288d1;
+      border-radius: 6px;
+      padding: 10px;
+      gap: 5px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .array-box div {
+      padding: 8px 12px;
+      background-color: #b3e5fc;
+      border: 1px solid #0288d1;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: transform 0.3s;
+    }
+
+    .label {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .merge-phase .array-box div {
+      background-color: #c8e6c9;
+      border-color: #388e3c;
+    }
+
+    .base-case .array-box div {
+      background-color: #fff9c4;
+      border-color: #fbc02d;
+    }
+
+    .branches {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .status {
+      text-align: center;
+      font-size: 16px;
+      margin-top: 10px;
+      color: #555;
+    }
+
+    .learn-section {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .learn-section h2 {
+      text-align: center;
+      color: #007bff;
+    }
+
+    .learn-section h3 {
+      color: #333;
+      margin-top: 20px;
+    }
+
+    .learn-section ul {
+      padding-left: 20px;
+    }
+
+    .learn-section li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Advanced Merge Sort Flowchart Simulation</h1>
+
+<div class="controls">
+  <input id="inputArray" type="text" placeholder="Enter array (e.g., 4, 2, 6, 1,8,9,3,5,7,0)">
+  <br>
+  <button onclick="setup()">Setup</button>
+  <button onclick="autoplay()" id="autoplayBtn" disabled>Autoplay</button>
+  <button onclick="reset()">Reset</button>
+</div>
+
+<div id="tree" class="tree"></div>
+<div class="status" id="statusMsg">Status: Awaiting setup...</div>
+
+<!-- 🔍 Learning Section -->
+<div class="learn-section">
+  <h2>📘 Learn More about Merge Sort</h2>
+
+  <h3>🔹 Definition:</h3>
+  <p>Merge Sort is a <strong>divide and conquer</strong> sorting algorithm that divides the input array into two halves, recursively sorts them, and then merges the sorted halves to produce the final sorted array.</p>
+
+  <h3>🔹 Time Complexity:</h3>
+  <ul>
+    <li><strong>Best Case:</strong> O(n log n)</li>
+    <li><strong>Average Case:</strong> O(n log n)</li>
+    <li><strong>Worst Case:</strong> O(n log n)</li>
+    <li><strong>Space Complexity:</strong> O(n) — extra space required for merging</li>
+  </ul>
+
+  <h3>🔹 Real-time Applications:</h3>
+  <ul>
+    <li>Sorting linked lists efficiently</li>
+    <li>External sorting (used when data doesn’t fit into RAM)</li>
+    <li>Used in the <strong>Merge Phase</strong> of the MapReduce programming model (Big Data)</li>
+    <li>Inversion count problems (used in competitive programming and bioinformatics)</li>
+    <li>As a stable sorting algorithm in many libraries and databases</li>
+  </ul>
+</div>
+
+<script>
+  let globalArray = [];
+  let isRunning = false;
+
+  function setup() {
+    const input = document.getElementById("inputArray").value;
+    const arr = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+
+    if (arr.length === 0) {
+      alert("Please enter a valid array.");
+      return;
+    }
+
+    globalArray = arr;
+    document.getElementById('tree').innerHTML = '';
+    document.getElementById('statusMsg').textContent = "Status: Ready to autoplay";
+    document.getElementById("autoplayBtn").disabled = false;
+  }
+
+  async function autoplay() {
+    if (globalArray.length === 0 || isRunning) return;
+
+    isRunning = true;
+    document.getElementById('tree').innerHTML = '';
+    document.getElementById('statusMsg').textContent = "Status: Running simulation...";
+    await visualizeMergeSort(globalArray, document.getElementById('tree'));
+    isRunning = false;
+    document.getElementById('statusMsg').textContent = "Status: Done!";
+  }
+
+  function reset() {
+    globalArray = [];
+    isRunning = false;
+    document.getElementById("inputArray").value = "";
+    document.getElementById("tree").innerHTML = "";
+    document.getElementById("autoplayBtn").disabled = true;
+    document.getElementById('statusMsg').textContent = "Status: Reset complete.";
+  }
+
+  async function visualizeMergeSort(arr, parentNode) {
+    const node = document.createElement('div');
+    node.className = 'node';
+
+    const arrayBox = document.createElement('div');
+    arrayBox.className = 'array-box';
+
+    arr.forEach(num => {
+      const item = document.createElement('div');
+      item.textContent = num;
+      arrayBox.appendChild(item);
+    });
+
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = arr.length <= 1 ? 'Base Case' : 'Dividing';
+
+    if (arr.length <= 1) node.classList.add('base-case');
+
+    node.appendChild(arrayBox);
+    node.appendChild(label);
+    parentNode.appendChild(node);
+
+    await sleep(600);
+
+    if (arr.length <= 1) return arr;
+
+    const mid = Math.floor(arr.length / 2);
+    const left = arr.slice(0, mid);
+    const right = arr.slice(mid);
+
+    const branches = document.createElement('div');
+    branches.className = 'branches';
+
+    const leftDiv = document.createElement('div');
+    const rightDiv = document.createElement('div');
+
+    branches.appendChild(leftDiv);
+    branches.appendChild(rightDiv);
+    node.appendChild(branches);
+
+    const sortedLeft = await visualizeMergeSort(left, leftDiv);
+    const sortedRight = await visualizeMergeSort(right, rightDiv);
+
+    const merged = merge(sortedLeft, sortedRight);
+
+    await sleep(800);
+
+    const mergedNode = document.createElement('div');
+    mergedNode.className = 'node merge-phase';
+
+    const mergeBox = document.createElement('div');
+    mergeBox.className = 'array-box';
+
+    merged.forEach(num => {
+      const item = document.createElement('div');
+      item.textContent = num;
+      mergeBox.appendChild(item);
+    });
+
+    const mergeLabel = document.createElement('div');
+    mergeLabel.className = 'label';
+    mergeLabel.textContent = 'Merging';
+
+    mergedNode.appendChild(mergeBox);
+    mergedNode.appendChild(mergeLabel);
+    parentNode.appendChild(mergedNode);
+
+    return merged;
+  }
+
+  function merge(left, right) {
+    let result = [];
+    let i = 0, j = 0;
+
+    while (i < left.length && j < right.length) {
+      if (left[i] <= right[j]) {
+        result.push(left[i++]);
+      } else {
+        result.push(right[j++]);
+      }
+    }
+
+    return result.concat(left.slice(i)).concat(right.slice(j));
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+</script>
+
+</body>
+</html>
